@@ -15,16 +15,21 @@ on:
 #    - cron: '15 13 * * 3'
   workflow_dispatch:
 
+  workflow_run:
+    workflows: ["CI-builds"]
+    types: 
+      - completed
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
 
 jobs:
-  cache:
-    uses: sysown/proxysql/.github/workflows/ci-builds.yml@GH-Actions
-    secrets: inherit
+#  cache:
+#    uses: mirostauder/proxysql/.github/workflows/ci-builds.yml@GH-Actions
+#    secrets: inherit
 
   run:
-    needs: [ "cache" ]
-    uses: sysown/proxysql/.github/workflows/ci-basictests.yml@GH-Actions
+#    needs: [ "cache" ]
+    uses: mirostauder/proxysql/.github/workflows/ci-basictests.yml@GH-Actions
     secrets: inherit
     
