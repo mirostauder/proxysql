@@ -18,11 +18,11 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
 
-env:
-  REPO: ${{ github.repository }}
 
 jobs:
   run:
-    uses: ${{ env.REPO }}/.github/workflows/ci-builds.yml@GH-Actions
+    uses: ./.github/workflows/ci-builds.yml
+    with:
+      workflow-ref: GH-Actions
     secrets: inherit
     
