@@ -1,4 +1,4 @@
-.GITHUBname: CI-builds
+name: CI-builds
 
 on:
   push:
@@ -18,8 +18,11 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
 
+env:
+  REPO: ${{ github.repository }}
+
 jobs:
   run:
-    uses: ${{ env.GITHUB_REPOSITORY }}/.github/workflows/ci-builds.yml@GH-Actions
+    uses: ${{ env.REPO }}/.github/workflows/ci-builds.yml@GH-Actions
     secrets: inherit
     
