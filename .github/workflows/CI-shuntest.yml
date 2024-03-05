@@ -12,6 +12,6 @@ concurrency:
 
 jobs:
   run:
-    uses: sysown/proxysql/.github/workflows/ci-shuntest.yml@GH-Actions
+    uses: mirostauder/proxysql/.github/workflows/ci-shuntest.yml@GH-Actions
     secrets: inherit
     
