@@ -13,5 +13,10 @@ concurrency:
 jobs:
   run:
     uses: mirostauder/proxysql/.github/workflows/ci-basictests.yml@GH-Actions
+    with:
+      ref: ${{ github.event.client_payload.ref }}
+      sha: ${{ github.event.client_payload.sha }}
     secrets: inherit
+
+
     
