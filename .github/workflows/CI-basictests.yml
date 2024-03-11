@@ -8,8 +8,8 @@ on:
     types: [ completed ]
 
 env:
-    github_ref: ${{ github.event.workflow_run.head_ref }}
-    github_sha: ${{ github.event.workflow_run.head_sha }}
+    GITHUB_REF: ${{ github.event.workflow_run.head_branch }}
+    GITHUB_SHA: ${{ github.event.workflow_run.head_sha }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
@@ -19,13 +19,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: |
-        echo ">>> ref='${{ env.github_ref }}'"
-        echo ">>> sha='${{ env.github_sha }}'"
+        echo ">>> ref='${{ env.GITHUB_REF }}'"
+        echo ">>> sha='${{ env.GITHUB_SHA }}'"
     
   run:
     uses: mirostauder/proxysql/.github/workflows/ci-basictests.yml@GH-Actions
     with:
-      github_sha: ${{ github.event.workflow_run.head_sha }}
+      GITHUB_SHA: ${{ github.event.workflow_run.head_sha }}
     secrets: inherit
 
 
