@@ -25,10 +25,10 @@ jobs:
 
     runs-on: ubuntu-latest  
     steps:
-    - name: ci-builds
+    - name: builds
       uses: mirostauder/proxysql/.github/workflows/ci-builds.yml@GH-Actions
     
-    - name: ci-builds-ready
+    - name: builds-ready
       if: ${{ success() }}
       uses: peter-evans/repository-dispatch@v3
       with:
