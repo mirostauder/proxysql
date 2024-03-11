@@ -3,15 +3,21 @@ name: CI-selftests
 on:
   workflow_dispatch:
 
-  workflow_run:
-    workflows: [ "CI-builds" ]
-    types: [ completed ]
+#  workflow_run:
+#    workflows: [ "CI-builds" ]
+#    types: [ completed ]
+
+  repository_dispatch:
+    types: [ ci-builds-ready ]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref_name }}
+  group: ${{ github.workflow }}-${{ github.event.client_payload.ref || github.ref_name }}
 
 jobs:
   run:
     uses: mirostauder/proxysql/.github/workflows/ci-selftests.yml@GH-Actions
+    with:
+      GITHUB_REF: ${{ github.event.client_payload.ref || github.ref }}
+      GITHUB_SHA: ${{ github.event.client_payload.sha || github.sha }}
     secrets: inherit
     
