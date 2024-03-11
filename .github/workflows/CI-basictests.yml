@@ -14,8 +14,8 @@ jobs:
   run:
     uses: mirostauder/proxysql/.github/workflows/ci-basictests.yml@GH-Actions
     with:
-      ref: ${{ github.event.client_payload.ref }}
-      sha: ${{ github.event.client_payload.sha }}
+      ref: ${{ github.event.workflow_run.head_ref }}
+      sha: ${{ github.event.workflow_run.head_sha }}
     secrets: inherit
 
 
