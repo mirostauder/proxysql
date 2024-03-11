@@ -19,7 +19,19 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
 
 jobs:
+
   run:
-    uses: sysown/proxysql/.github/workflows/ci-builds.yml@GH-Actions
+    uses: mirostauder/proxysql/.github/workflows/ci-builds.yml@GH-Actions
     secrets: inherit
-    
+
+  ready:
+    runs-on: ubuntu-22.04
+    needs: [ run ]
+    if: ${{ success() }}
+    steps:
+    - uses: peter-evans/repository-dispatch@v3
+      with:
+        token: ${{ secrets.GH_TOKEN }}
+        event-type: ci-builds-ready
+        client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+      
