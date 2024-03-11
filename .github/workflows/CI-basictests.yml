@@ -7,15 +7,23 @@ on:
     workflows: [ "CI-builds" ]
     types: [ completed ]
 
+env:
+    github_ref: ${{ github.event.workflow_run.head_ref }}
+    github_sha: ${{ github.event.workflow_run.head_sha }}
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
 
 jobs:
+  dump:
+    runs-on: ubuntu-latest
+    steps:
+    - run: |
+        echo ">>> ref='${{ env.github_ref }}'"
+        echo ">>> sha='${{ env.github_sha }}'"
+    
   run:
     uses: mirostauder/proxysql/.github/workflows/ci-basictests.yml@GH-Actions
-    with:
-      ref: ${{ github.event.workflow_run.head_ref }}
-      sha: ${{ github.event.workflow_run.head_sha }}
     secrets: inherit
 
 
