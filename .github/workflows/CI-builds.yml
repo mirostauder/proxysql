@@ -19,18 +19,17 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
 
 jobs:
-  run:
-#    uses: mirostauder/proxysql/.github/workflows/ci-builds.yml@GH-Actions
-#    secrets: inherit
 
-    runs-on: ubuntu-latest  
+  run:
+    uses: mirostauder/proxysql/.github/workflows/ci-builds.yml@GH-Actions
+    secrets: inherit
+
+  ready:
+    runs-on: ubuntu-22.04
+    needs: [ run ]
+    if: ${{ success() }}
     steps:
-    - name: builds
-      uses: mirostauder/proxysql/.github/workflows/ci-builds.yml@GH-Actions
-    
-    - name: builds-ready
-      if: ${{ success() }}
-      uses: peter-evans/repository-dispatch@v3
+    - uses: peter-evans/repository-dispatch@v3
       with:
         token: ${{ secrets.GH_TOKEN }}
         event-type: ci-builds-ready
