@@ -25,7 +25,7 @@ jobs:
   run:
     uses: mirostauder/proxysql/.github/workflows/ci-basictests.yml@GH-Actions
     with:
-      sha: ${{ env.github_sha }}
+      sha: ${{ github.event.workflow_run.head_sha }}
     secrets: inherit
 
 
