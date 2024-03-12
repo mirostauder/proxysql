@@ -1,32 +1,24 @@
 name: CI-basictests
 
 on:
+  push:
+    branches: [ "v2.x" ]
+    paths-ignore:
+    - '.github/**'
+    - '**.md'
+  pull_request:
+    branches: [ "v2.x" ]
+    paths-ignore:
+    - '.github/**'
+    - '**.md'
+#  schedule:
+#    - cron: '15 13 * * 3'
   workflow_dispatch:
-
-  workflow_run:
-    workflows: [ "CI-builds" ]
-    types: [ completed ]
-
-env:
-    GITHUB_REF: ${{ github.event.workflow_run.head_branch }}
-    GITHUB_SHA: ${{ github.event.workflow_run.head_sha }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
 
 jobs:
-  dump:
-    runs-on: ubuntu-latest
-    steps:
-    - run: |
-        echo ">>> ref='${{ env.GITHUB_REF }}'"
-        echo ">>> sha='${{ env.GITHUB_SHA }}'"
-    
   run:
     uses: mirostauder/proxysql/.github/workflows/ci-basictests.yml@GH-Actions
-    with:
-      GITHUB_SHA: ${{ github.event.workflow_run.head_sha }}
     secrets: inherit
-
-
-    
