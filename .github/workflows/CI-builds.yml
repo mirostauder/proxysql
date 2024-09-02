@@ -5,13 +5,13 @@ env:
 on:
   push:
     branches:
-    - ${{env.MAIN}}
+    - ${{MAIN}}
     paths-ignore:
     - '.github/**'
     - '**.md'
   pull_request:
     branches:
-    - ${{env.MAIN}}
+    - ${{MAIN}}
     paths-ignore:
     - '.github/**'
     - '**.md'
