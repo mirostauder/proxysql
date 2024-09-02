@@ -5,14 +5,14 @@ env:
 on:
   push:
     branches:
-    - 'v[0-9]+.[0-9]+.?[0-9]*'
+    - 'v[0-9]+.[0-9]+'
     paths-ignore:
     - '.github/**'
     - '**.md'
 #    if: github.ref_name == github.event.repository.default_branch
   pull_request:
     branches:
-    - 'v[0-9]+.[0-9]+.?[0-9]*'
+    - 'v[0-9]+.[0-9]+'
     paths-ignore:
     - '.github/**'
     - '**.md'
