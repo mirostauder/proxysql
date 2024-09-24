@@ -2,12 +2,12 @@ name: CI-builds
 
 on:
   push:
-    branches: [ "v[0-9]*.x?[0-9]*" ]
+#    branches: [ "v[0-9]*.x?[0-9]*" ]
     paths-ignore:
     - '.github/**'
     - '**.md'
   pull_request:
-    branches: [ "v[0-9]*.x?[0-9]*" ]
+#    branches: [ "v[0-9]*.x?[0-9]*" ]
     paths-ignore:
     - '.github/**'
     - '**.md'
