@@ -24,11 +24,9 @@ concurrency:
 
 jobs:
   run-mysql:
-    needs: [ run-builds ]
     uses: mirostauder/proxysql/.github/workflows/ci-3p-laravel-framework_mysql.yml@GH-Actions
     secrets: inherit
   run-mariadb:
-    needs: [ run-builds ]
     uses: mirostauder/proxysql/.github/workflows/ci-3p-laravel-framework_mariadb.yml@GH-Actions
     secrets: inherit
     
