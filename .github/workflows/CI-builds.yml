@@ -1,7 +1,7 @@
 name: CI-builds
 
 on:
-#  push:
+  push:
 #    branches: [ "v2.7" ]
 #    paths-ignore:
 #    - '.github/**'
