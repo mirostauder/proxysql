@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   run-mysql:
-    uses: sysown/proxysql/.github/workflows/ci-dump.yml@GH-Actions
+    uses: mirostauder/proxysql/.github/workflows/ci-dump.yml@GH-Actions
     secrets: inherit
     with:
       sha: ${{ github.sha }}
