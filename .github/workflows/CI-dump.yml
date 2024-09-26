@@ -15,7 +15,7 @@ jobs:
     uses: mirostauder/proxysql/.github/workflows/ci-dump.yml@GH-Actions
     secrets: inherit
     with:
-      sha: ${{ github.sha }}
+      sha: ${{ github.event.workflow_run.head_sha }}
       infradb: "[ 'mysql57', 'mysql80', 'mysql84', 'mysql90' ]"
       connector: "[ 'pymysql', 'mysqldb', 'asyncmy', 'mariadbconnector' ]"
     
