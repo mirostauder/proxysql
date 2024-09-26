@@ -5,7 +5,9 @@ on:
   workflow_dispatch:
   workflow_call:
     inputs:
-      sha:
+#      sha:
+#        type: string
+      trigger:
         type: string
       infradb:
         type: string
@@ -26,7 +28,8 @@ jobs:
     steps:
     - name: Print Matrix Item
       run: |
-        echo ">>> ${{ inputs.sha }} ${{ matrix.infradb }} ${{ matrix.connector }} <<<"
+        #echo ">>> ${{ inputs.sha }} ${{ matrix.infradb }} ${{ matrix.connector }} <<<"
+        echo ">>> ${{ inputs.trigger.event.workflow_run.head_sha }} ${{ matrix.infradb }} ${{ matrix.connector }} <<<"
 
 
   dump:
