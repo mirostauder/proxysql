@@ -29,7 +29,7 @@ jobs:
     - name: Print Matrix Item
       run: |
         #echo ">>> ${{ inputs.sha }} ${{ matrix.infradb }} ${{ matrix.connector }} <<<"
-        echo ">>> ${{ inputs.trigger.event.workflow_run.head_sha }} ${{ matrix.infradb }} ${{ matrix.connector }} <<<"
+        echo ">>> ${{ fromJson(inputs.trigger).event.workflow_run.head_sha }} ${{ matrix.infradb }} ${{ matrix.connector }} <<<"
 
 
   dump:
