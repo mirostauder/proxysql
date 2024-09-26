@@ -1,0 +1,21 @@
+name: CI-dump
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [ CI-builds ]
+    types: [ completed ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  run-mysql:
+    uses: sysown/proxysql/.github/workflows/ci-dump.yml@GH-Actions
+    secrets: inherit
+    with:
+      sha: ${{ github.sha }}
+      infradb: "[ 'mysql57', 'mysql80', 'mysql84', 'mysql90' ]"
+      connector: "[ 'pymysql', 'mysqldb', 'asyncmy', 'mariadbconnector' ]"
+    
