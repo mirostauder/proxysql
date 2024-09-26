@@ -16,6 +16,9 @@ on:
 
 permissions: write-all
 
+env:
+  SHA: ${{ fromJson(inputs.trigger).event.workflow_run.head_sha }}
+
 jobs:
   items:
     runs-on: ubuntu-22.04
@@ -29,7 +32,7 @@ jobs:
     - name: Print Matrix Item
       run: |
         #echo ">>> ${{ inputs.sha }} ${{ matrix.infradb }} ${{ matrix.connector }} <<<"
-        echo ">>> ${{ fromJson(inputs.trigger).event.workflow_run.head_sha }} ${{ matrix.infradb }} ${{ matrix.connector }} <<<"
+        echo ">>> $SHA ${{ env.SHA }} ${{ matrix.infradb }} ${{ matrix.connector }} <<<"
 
 
   dump:
