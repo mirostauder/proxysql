@@ -19,5 +19,6 @@ jobs:
       trigger: ${{ toJson(github) }}
 #      infradb: "[ 'mysql57', 'mysql80', 'mysql84', 'mysql90' ]"
       infradb: ${{ vars.CI_3P_SQLALCHEMY_infradb_mysql }}
-      connector: "[ 'pymysql', 'mysqldb', 'asyncmy', 'mariadbconnector' ]"
+#      connector: "[ 'pymysql', 'mysqldb', 'asyncmy', 'mariadbconnector' ]"
+      connector: ${{ vars.CI_3P_SQLALCHEMY_connector_mysql }}
     
