@@ -17,6 +17,7 @@ jobs:
     with:
 #      sha: ${{ github.event.workflow_run.head_sha }}
       trigger: ${{ toJson(github) }}
-      infradb: "[ 'mysql57', 'mysql80', 'mysql84', 'mysql90' ]"
+#      infradb: "[ 'mysql57', 'mysql80', 'mysql84', 'mysql90' ]"
+      infradb: ${{ vars.CI_3P_SQLALCHEMY_infradb_mysql }}
       connector: "[ 'pymysql', 'mysqldb', 'asyncmy', 'mariadbconnector' ]"
     
