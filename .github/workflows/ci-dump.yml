@@ -33,7 +33,15 @@ jobs:
       run: |
         #echo ">>> ${{ inputs.sha }} ${{ matrix.infradb }} ${{ matrix.connector }} <<<"
         echo ">>> $SHA ${{ env.SHA }} ${{ matrix.infradb }} ${{ matrix.connector }} <<<"
-
+    
+    - uses: LouisBrunner/checks-action@v2.0.0
+      if: always()
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        name: Test XYZ
+        repo: ${{ github.repo }}
+        sha: ${{ env.SHA }}
+        conclusion: ${{ job.status }}
 
   dump:
     runs-on: ubuntu-22.04
