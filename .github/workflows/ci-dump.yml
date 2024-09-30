@@ -1,4 +1,3 @@
-
 name: CI-dump
 
 on:
@@ -29,41 +28,51 @@ jobs:
         connector: ${{ fromJson(inputs.connector) }}
     
     steps:
-    - name: Print Matrix Item
-      run: |
-        #echo ">>> ${{ inputs.sha }} ${{ matrix.infradb }} ${{ matrix.connector }} <<<"
-        echo ">>> $SHA ${{ env.SHA }} ${{ matrix.infradb }} ${{ matrix.connector }} <<<"
-    
+
     - uses: LouisBrunner/checks-action@v2.0.0
       if: always()
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        name: ${{ github.workflow }}
+        name: '${{ github.workflow }} / ${{ github.job }}'
         repo: ${{ github.repo }}
         sha: ${{ env.SHA }}
         status: 'in_progress'
-        action_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+#        action_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
         details_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
 
-    - name: Sleep
+    - name: Print Matrix Item
       run: |
+        #echo ">>> ${{ inputs.sha }} ${{ matrix.infradb }} ${{ matrix.connector }} <<<"
+        echo ">>> $SHA ${{ env.SHA }} ${{ matrix.infradb }} ${{ matrix.connector }} <<<"
         sleep 30
 
     - uses: LouisBrunner/checks-action@v2.0.0
       if: always()
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        name: ${{ github.workflow }}
+        name: '${{ github.workflow }} / ${{ github.job }}'
         repo: ${{ github.repo }}
         sha: ${{ env.SHA }}
         conclusion: ${{ job.status }}
-        action_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+#        action_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
         details_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
 
 
   dump:
     runs-on: ubuntu-22.04
     steps:
+
+    - uses: LouisBrunner/checks-action@v2.0.0
+      if: always()
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        name: '${{ github.workflow }} / ${{ github.job }}'
+        repo: ${{ github.repo }}
+        sha: ${{ env.SHA }}
+        status: 'in_progress'
+#        action_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+        details_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+
 
     - name: Dump GitHub context
       env:
@@ -104,3 +113,20 @@ jobs:
       env:
         MATRIX_CONTEXT: ${{ toJson(matrix) }}
       run: echo "$MATRIX_CONTEXT"
+
+
+    - name: Sleep
+      run: |
+        sleep 30
+
+    - uses: LouisBrunner/checks-action@v2.0.0
+      if: always()
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        name: '${{ github.workflow }} / ${{ github.job }}'
+        repo: ${{ github.repo }}
+        sha: ${{ env.SHA }}
+        conclusion: ${{ job.status }}
+#        action_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+        details_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+
