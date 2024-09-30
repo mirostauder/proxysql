@@ -33,7 +33,7 @@ jobs:
       if: always()
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        name: '${{ github.workflow }} / ${{ github.job }}'
+        name: '${{ github.workflow }} / ${{ toJson(matrix) }}'
         repo: ${{ github.repo }}
         sha: ${{ env.SHA }}
         status: 'in_progress'
