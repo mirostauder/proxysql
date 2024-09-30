@@ -26,6 +26,8 @@ jobs:
       matrix:
         infradb: ${{ fromJson(inputs.infradb) }}
         connector: ${{ fromJson(inputs.connector) }}
+    env:
+      matrix: '(${{ matrix.infradb }},${{ matrix.connector }})'
     
     steps:
 
@@ -33,7 +35,7 @@ jobs:
       if: always()
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        name: '${{ github.workflow }} / ${{ toJson(matrix) }}'
+        name: '${{ github.workflow }} / ${{ github.job }} / ${{ env.matrix }}'
         repo: ${{ github.repo }}
         sha: ${{ env.SHA }}
         status: 'in_progress'
@@ -50,7 +52,7 @@ jobs:
       if: always()
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        name: '${{ github.workflow }} / ${{ github.job }}'
+        name: '${{ github.workflow }} / ${{ github.job }} / ${{ env.matrix }}'
         repo: ${{ github.repo }}
         sha: ${{ env.SHA }}
         conclusion: ${{ job.status }}
