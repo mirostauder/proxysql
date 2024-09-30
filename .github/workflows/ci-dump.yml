@@ -42,6 +42,7 @@ jobs:
         repo: ${{ github.repo }}
         sha: ${{ env.SHA }}
         conclusion: ${{ job.status }}
+        action_url: 'https://github.com/${{ github.repository }}/actions/jobs/${{ github.run_id }}'
 
   dump:
     runs-on: ubuntu-22.04
