@@ -1,5 +1,5 @@
 name: CI-dump
-run-name: '${{ github.event.workflow_run.head_branch }} ${{ github.workflow }} ${{ github.sha[0] || NOPE }}'
+run-name: '${{ github.event.workflow_run.head_branch }} ${{ github.workflow }} ${{ github.sha }}'
 
 on:
   workflow_dispatch:
