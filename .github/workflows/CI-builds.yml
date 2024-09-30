@@ -1,5 +1,5 @@
 name: CI-builds
-run-name: '${{ github.ref_name }} ${{ github.workflow }} ${{ github.sha[0] || NOPE }}'
+run-name: '${{ github.ref_name }} ${{ github.workflow }} ${{ github.sha }}'
 
 on:
   push:
