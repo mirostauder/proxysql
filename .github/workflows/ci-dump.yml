@@ -35,7 +35,7 @@ jobs:
       if: always()
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        name: '${{ github.workflow }} / ${{ github.job }} / ${{ env.matrix }}'
+        name: '${{ github.workflow }} / ${{ github.job }} ${{ env.matrix }}'
         repo: ${{ github.repo }}
         sha: ${{ env.SHA }}
         status: 'in_progress'
@@ -52,7 +52,7 @@ jobs:
       if: always()
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        name: '${{ github.workflow }} / ${{ github.job }} / ${{ env.matrix }}'
+        name: '${{ github.workflow }} / ${{ github.job }} ${{ env.matrix }}'
         repo: ${{ github.repo }}
         sha: ${{ env.SHA }}
         conclusion: ${{ job.status }}
