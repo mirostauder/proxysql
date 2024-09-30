@@ -12,7 +12,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  run-mysql:
+  run-dump:
+    if: ${{ github.event.workflow_run && github.event.workflow_run.conclusion == 'success' || ! github.event.workflow_run }}
     uses: mirostauder/proxysql/.github/workflows/ci-dump.yml@GH-Actions
     secrets: inherit
     with:
