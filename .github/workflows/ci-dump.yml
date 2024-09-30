@@ -38,7 +38,7 @@ jobs:
       if: always()
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        name: Test XYZ
+        name: ${{ github.workflow }}
         repo: ${{ github.repo }}
         sha: ${{ env.SHA }}
         conclusion: ${{ job.status }}
