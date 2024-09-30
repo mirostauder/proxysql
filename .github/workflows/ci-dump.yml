@@ -41,8 +41,25 @@ jobs:
         name: ${{ github.workflow }}
         repo: ${{ github.repo }}
         sha: ${{ env.SHA }}
+        status: 'in_progress'
+        action_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+        details_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+
+    - name: Sleep
+      run: |
+        sleep 30
+
+    - uses: LouisBrunner/checks-action@v2.0.0
+      if: always()
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        name: ${{ github.workflow }}
+        repo: ${{ github.repo }}
+        sha: ${{ env.SHA }}
         conclusion: ${{ job.status }}
         action_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+        details_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+
 
   dump:
     runs-on: ubuntu-22.04
