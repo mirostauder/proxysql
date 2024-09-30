@@ -1,5 +1,5 @@
 name: CI-dump
-run-name: '${{ github.event.workflow_run.display_title }} ${{ github.ref_name }}'
+run-name: '${{ github.event.workflow_run.head_branch }} ${{ github.event.workflow_run.display_title }}'
 
 on:
   workflow_dispatch:
