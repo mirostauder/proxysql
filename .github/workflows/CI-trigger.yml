@@ -21,6 +21,8 @@ jobs:
 
     steps:
     - name: Triggered CI-builds
+      env:
+        GH_TOKEN: ${{ secrets.gh_token }}
       run: |
         echo "Triggered by workflow_run[in_progress]: '${{ github.ref_name }} CI-builds ${{ github.sha }}'"
         RUNID=$(gh -R ${{ github.repository }} run list | grep '${{ github.ref_name }} CI-builds ${{ github.sha }}' | grep -Po '(?<=workflow_run)\s+\d+')
