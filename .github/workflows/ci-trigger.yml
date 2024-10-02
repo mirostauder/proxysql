@@ -21,7 +21,7 @@ jobs:
         done
         
         echo "Trigger workflow_run[in_progress]: '${{ github.ref_name }} ${{ github.workflow }} ${{ github.sha }}'"
-        gh -R ${{ github.repository }} run watch -i 30 ${RUNID}
+        gh -R ${{ github.repository }} run watch -i 30 ${RUNID} >/dev/null
 
     - name: Trigger workflow_run[completed]
       run: |
