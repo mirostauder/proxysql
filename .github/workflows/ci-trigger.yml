@@ -5,7 +5,7 @@ on:
   workflow_call:
 
 jobs:
-  items:
+  trigger:
     runs-on: ubuntu-22.04
 
     steps:
