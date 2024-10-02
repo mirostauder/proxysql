@@ -23,6 +23,7 @@ jobs:
     - name: Triggered CI-builds
       run: |
         echo "Triggered by workflow_run[in_progress]: '${{ github.ref_name }} CI-builds ${{ github.sha }}'"
+        sleep 30
     
     - name: Wait
       uses: lewagon/wait-on-check-action@v1.3.4
