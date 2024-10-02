@@ -1,20 +1,11 @@
 name: CI-builds
-run-name: '${{ github.ref_name }} ${{ github.workflow }}'
+run-name: '${{ github.ref_name }} ${{ github.workflow }} ${{ github.sha }}'
 
 on:
-  push:
-#    branches: [ 'v[0-9]+.x','v[0-9]+.[0-9]+','v[0-9]+.[0-9]+.[0-9]+' ]
-    paths-ignore:
-    - '.github/**'
-    - '**.md'
-  pull_request:
-#    branches: [ 'v[0-9]+.x','v[0-9]+.[0-9]+','v[0-9]+.[0-9]+.[0-9]+' ]
-    paths-ignore:
-    - '.github/**'
-    - '**.md'
-#  schedule:
-#    - cron: '15 13 * * 3'
   workflow_dispatch:
+  workflow_run:
+    workflows: [ CI-trigger ]
+    types: [ completed ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
