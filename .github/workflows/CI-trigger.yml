@@ -20,7 +20,18 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-    - name: Triggered
+    - name: Triggered CI-builds
       run: |
-        echo "${{ github.ref_name }} ${{ github.workflow }} ${{ github.sha }}"
+        echo "Triggered by workflow_run[in_progress]: '${{ github.ref_name }} CI-builds ${{ github.sha }}'"
     
+    - name: Wait
+      uses: lewagon/wait-on-check-action@v1.3.4
+      with:
+        ref: ${{ github.ref }}
+        check-name: '${{ github.ref_name }} CI-builds ${{ github.sha }}'
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        wait-interval: 30
+
+    - name: Triggered CI-dump
+      run: |
+        echo "Triggered by workflow_run[completed]: '${{ github.ref_name }} CI-dump ${{ github.sha }}'"
