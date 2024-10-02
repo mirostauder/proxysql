@@ -18,3 +18,7 @@ concurrency:
 jobs:
   trigger:
     runs-on: ubuntu-22.04
+
+    steps:
+    - name: Thats All Folks
+    
