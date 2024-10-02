@@ -80,7 +80,7 @@ jobs:
         enableCrossOsArchive: true
         fail-on-cache-miss: true
         path: |
-          proxysql/src/
+          proxysql/binaries/
 
     - uses: LouisBrunner/checks-action@v2.0.0
       if: always()
