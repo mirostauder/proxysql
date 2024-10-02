@@ -17,22 +17,6 @@ concurrency:
 
 jobs:
   trigger:
-    runs-on: ubuntu-22.04
+    uses: mirostauder/proxysql/.github/workflows/ci-trigger.yml@GH-Actions
+    secrets: inherit
 
-    steps:
-    - name: Triggered CI-builds
-      env:
-        GH_TOKEN: ${{ secrets.gh_token }}
-      run: |
-        sleep 5
-        RUNID=$(gh -R ${{ github.repository }} run list | grep '${{ github.ref_name }} CI-builds ${{ github.sha }}' | grep -Po '(?<=workflow_run)\s+\d+')
-        while [[ -z ${RUNID} ]]; do
-          sleep 5
-          RUNID=$(gh -R ${{ github.repository }} run list | grep '${{ github.ref_name }} CI-builds ${{ github.sha }}' | grep -Po '(?<=workflow_run)\s+\d+')
-        done
-        echo "Triggered by workflow_run[in_progress]: '${{ github.ref_name }} CI-builds ${{ github.sha }}'"
-        gh -R ${{ github.repository }} run watch -i 30 ${RUNID}
-
-    - name: Triggered CI-dump
-      run: |
-        echo "Triggered by workflow_run[completed]: '${{ github.ref_name }} CI-dump ${{ github.sha }}'"
