@@ -20,5 +20,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-    - name: Thats All Folks
+    - name: Triggered
+      run: |
+        echo "${{ github.ref_name }} ${{ github.workflow }} ${{ github.sha }}"
     
