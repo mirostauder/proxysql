@@ -17,6 +17,7 @@ permissions: write-all
 
 env:
   SHA: ${{ fromJson(inputs.trigger).event.workflow_run.head_sha }}
+  BLDCACHE: ${{ fromJson(inputs.trigger).event.workflow_run.head_sha }}_debian10_bin
 
 jobs:
   items:
@@ -47,6 +48,31 @@ jobs:
         #echo ">>> ${{ inputs.sha }} ${{ matrix.infradb }} ${{ matrix.connector }} <<<"
         echo ">>> $SHA ${{ env.SHA }} ${{ matrix.infradb }} ${{ matrix.connector }} <<<"
         sleep 30
+
+    - name: Wait for cache
+      env:
+        GH_TOKEN: ${{ secrets.gh_token }}
+      run: |
+        echo "BASELINE: '${BASELINE}'"
+        echo "Wating for cache '${BLDCACHE}' ..."
+        sleep $(( $RANDOM / 1024 ))
+        PROBE="$(gh cache list --limit 300 --repo ${{ github.repository }} | grep -i ${BLDCACHE} || echo '')"
+        while [[ -z ${PROBE} ]]; do
+          echo "Wating for cache '${BLDCACHE}' ..."
+          sleep 30
+          PROBE="$(gh cache list --limit 300 --repo ${{ github.repository }} | grep -i ${BLDCACHE} || echo '')"
+        done
+        echo "Cache available '${BLDCACHE}'"
+
+    - name: Cache restore src
+      id: cache-src
+      uses: actions/cache/restore@v4
+      with:
+        key: ${{ env.BLDCACHE }}
+        enableCrossOsArchive: true
+        fail-on-cache-miss: true
+        path: |
+          proxysql/src/
 
     - uses: LouisBrunner/checks-action@v2.0.0
       if: always()
