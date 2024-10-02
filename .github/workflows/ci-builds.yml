@@ -3,11 +3,15 @@ name: CI-builds
 on:
   workflow_dispatch:
   workflow_call:
+    inputs:
+      trigger:
+        type: string
 
 permissions: write-all
 
 env:
   LOCK: CI_BUILDS_${{ github.sha }}
+  SHA: ${{ inputs.trigger && fromJson(inputs.trigger).event.workflow_run.head_sha || github.sha }}
 
 jobs:
 
@@ -72,7 +76,8 @@ jobs:
 #            type: '-clang-tap-asan'
     env:
 #      BLDCACHE: CI-builds_${{ github.sha }}_${{ matrix.dist }}${{ matrix.type }}
-      BLDCACHE: ${{ github.sha }}_${{ matrix.dist }}${{ matrix.type }}
+#      BLDCACHE: ${{ github.sha }}_${{ matrix.dist }}${{ matrix.type }}
+      BLDCACHE: ${{ inputs.trigger && fromJson(inputs.trigger).event.workflow_run.head_sha || github.sha }}_${{ matrix.dist }}${{ matrix.type }}
 
     steps:
 
