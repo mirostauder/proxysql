@@ -49,14 +49,6 @@ jobs:
         echo ">>> $SHA ${{ env.SHA }} ${{ matrix.infradb }} ${{ matrix.connector }} <<<"
         sleep 30
 
-    - name: Cache save matrix
-      id: cache-save-matrix
-      uses: actions/cache/save@v4
-      with:
-        key: ${{ env.BLDCACHE }}_matrix_${{ matrix.infradb }}_${{ matrix.connector }}
-        path: |
-          .
-
     - name: Wait for cache
       env:
         GH_TOKEN: ${{ secrets.gh_token }}
@@ -72,7 +64,7 @@ jobs:
         done
         echo "Cache available '${BLDCACHE}'"
 
-    - name: Cache restore src
+    - name: Cache restore debian10-bin
       id: cache-src
       uses: actions/cache/restore@v4
       with:
