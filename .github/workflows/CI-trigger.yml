@@ -23,15 +23,8 @@ jobs:
     - name: Triggered CI-builds
       run: |
         echo "Triggered by workflow_run[in_progress]: '${{ github.ref_name }} CI-builds ${{ github.sha }}'"
-        sleep 30
-    
-    - name: Wait
-      uses: lewagon/wait-on-check-action@v1.3.4
-      with:
-        ref: ${{ github.ref }}
-        check-name: '${{ github.ref_name }} CI-builds ${{ github.sha }}'
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-        wait-interval: 30
+        RUNID=$(gh -R ${{ github.repository }} run list | grep '${{ github.ref_name }} CI-builds ${{ github.sha }}' | grep -Po '(?<=workflow_run)\s+\d+')
+        gh -R ${{ github.repository }} run watch -i 30 ${RUNID}
 
     - name: Triggered CI-dump
       run: |
