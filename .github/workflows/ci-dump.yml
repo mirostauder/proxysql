@@ -37,7 +37,7 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         name: '${{ github.workflow }} / ${{ github.job }} ${{ env.matrix }}'
-        repo: ${{ github.repo }}
+        repo: ${{ github.repository }}
         sha: ${{ env.SHA }}
         status: 'in_progress'
 #        action_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
@@ -79,7 +79,7 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         name: '${{ github.workflow }} / ${{ github.job }} ${{ env.matrix }}'
-        repo: ${{ github.repo }}
+        repo: ${{ github.repository }}
         sha: ${{ env.SHA }}
         conclusion: ${{ job.status }}
 #        action_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
@@ -95,7 +95,7 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         name: '${{ github.workflow }} / ${{ github.job }}'
-        repo: ${{ github.repo }}
+        repo: ${{ github.repository }}
         sha: ${{ env.SHA }}
         status: 'in_progress'
 #        action_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
@@ -152,7 +152,7 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         name: '${{ github.workflow }} / ${{ github.job }}'
-        repo: ${{ github.repo }}
+        repo: ${{ github.repository }}
         sha: ${{ env.SHA }}
         conclusion: ${{ job.status }}
 #        action_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
