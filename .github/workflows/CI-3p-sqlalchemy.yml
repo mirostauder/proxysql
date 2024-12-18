@@ -3,7 +3,7 @@ name: CI-3p-sqlalchemy
 on:
   workflow_dispatch:
     inputs:
-      p3pt_branch:
+      testtree:
         default: main
         type: string
   workflow_run:
