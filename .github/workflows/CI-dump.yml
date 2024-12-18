@@ -5,8 +5,8 @@ on:
   workflow_dispatch:
     inputs:
       p3pt_branch:
-      default: main
-      type: string
+        default: main
+        type: string
   workflow_run:
     workflows: [ CI-trigger ]
     types: [ completed ]
