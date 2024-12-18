@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       testtree:
+        description: 'proxysql_3p_testing branch/tag/hash'
         default: main
         type: string
   workflow_run:
