@@ -2,6 +2,10 @@ name: CI-3p-sqlalchemy
 
 on:
   workflow_dispatch:
+    inputs:
+      p3pt_branch:
+        default: main
+        type: string
   workflow_run:
     workflows: [ CI-builds ]
     types: [ completed ]
@@ -14,4 +18,7 @@ jobs:
   run:
     uses: sysown/proxysql/.github/workflows/ci-3p-sqlalchemy.yml@GH-Actions
     secrets: inherit
-    
+    with:
+      trigger: ${{ toJson(github) }}
+      infradb: ${{ vars.MATRIX_3P_SQLALCHEMY_infradb_mariadb }}
+      connector: ${{ vars.MATRIX_3P_SQLALCHEMY_connector_mariadb }}
