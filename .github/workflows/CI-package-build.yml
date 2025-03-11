@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   run:
-    uses: mirostauder/proxysql/.github/workflows/ci-package-build.yml@GH-Actions
+    uses: mirostauder/proxysql/.github/workflows/ci-package-build-arm64.yml@GH-Actions
     secrets: inherit
     with:
       trigger: ${{ toJson(github) }}
