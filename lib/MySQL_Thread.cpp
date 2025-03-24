@@ -504,6 +504,7 @@ static char * mysql_thread_variables_names[]= {
 	(char *)"handle_warnings",
 	(char *)"evaluate_replication_lag_on_servers_load",
 	(char *)"proxy_protocol_networks",
+	(char *)"protocol_compression_level",
 	NULL
 };
 
@@ -1137,6 +1138,7 @@ MySQL_Threads_Handler::MySQL_Threads_Handler() {
 	variables.enable_load_data_local_infile=false;
 	variables.log_mysql_warnings_enabled=false;
 	variables.data_packets_history_size=0;
+	variables.protocol_compression_level=3;
 	// status variables
 	status_variables.mirror_sessions_current=0;
 	__global_MySQL_Thread_Variables_version=1;
@@ -1204,7 +1206,11 @@ int MySQL_Threads_Handler::listener_del(const char *iface) {
 		}
 		for (i=0;i<num_threads;i++) {
 			MySQL_Thread *thr=(MySQL_Thread *)mysql_threads[i].worker;
-			while(__sync_fetch_and_add(&thr->mypolls.pending_listener_del,0));
+			while(__sync_fetch_and_add(&thr->mypolls.pending_listener_del,0)) {
+				// Since 'listeners_stop' is performed in 'maintenance_loops' by the
+				// workers this active-wait is likely to take some time.
+				usleep(std::min(std::max(mysql_thread___poll_timeout/20, 10000), 40000));
+			}
 		}
 		MLM->del(idx);
 #ifdef SO_REUSEPORT
@@ -2264,6 +2270,7 @@ char ** MySQL_Threads_Handler::get_variables_list() {
 		VariablesPointers_int["client_host_error_counts"]      = make_tuple(&variables.client_host_error_counts,      0,      1024*1024, false);
 		VariablesPointers_int["handle_warnings"]			   = make_tuple(&variables.handle_warnings,				  0,			  1, false);
 		VariablesPointers_int["evaluate_replication_lag_on_servers_load"] = make_tuple(&variables.evaluate_replication_lag_on_servers_load, 0, 1, false);
+		VariablesPointers_int["protocol_compression_level"]    = make_tuple(&variables.protocol_compression_level,   -1,              9, false);
 
 		// logs
 		VariablesPointers_int["auditlog_filesize"]     = make_tuple(&variables.auditlog_filesize,    1024*1024, 1*1024*1024*1024, false);
@@ -2414,7 +2421,6 @@ void MySQL_Threads_Handler::init(unsigned int num, size_t stack) {
  * @return A pointer to the created MySQL thread.
  */
 proxysql_mysql_thread_t * MySQL_Threads_Handler::create_thread(unsigned int tn, void *(*start_routine) (void *), bool idles) {
-	char thr_name[16];
 	if (idles==false) {
 		if (pthread_create(&mysql_threads[tn].thread_id, &attr, start_routine , &mysql_threads[tn]) != 0 ) {
 			// LCOV_EXCL_START
@@ -2422,8 +2428,13 @@ proxysql_mysql_thread_t * MySQL_Threads_Handler::create_thread(unsigned int tn, 
 			assert(0);
 			// LCOV_EXCL_STOP
 		}
-		snprintf(thr_name, sizeof(thr_name), "MySQLWorker%d", tn);
-		pthread_setname_np(mysql_threads[tn].thread_id, thr_name);
+#if defined(__linux__) || defined(__FreeBSD__)
+		if (GloVars.set_thread_name == true) {
+			char thr_name[16];
+			snprintf(thr_name, sizeof(thr_name), "MySQLWorker%d", tn);
+			pthread_setname_np(mysql_threads[tn].thread_id, thr_name);
+		}
+#endif // defined(__linux__) || defined(__FreeBSD__)
 #ifdef IDLE_THREADS
 	} else {
 		if (GloVars.global.idle_threads) {
@@ -2433,8 +2444,14 @@ proxysql_mysql_thread_t * MySQL_Threads_Handler::create_thread(unsigned int tn, 
 				assert(0);
 				// LCOV_EXCL_STOP
 			}
-			snprintf(thr_name, sizeof(thr_name), "MySQLIdle%d", tn);
+#if defined(__linux__) || defined(__FreeBSD__)
+			if (GloVars.set_thread_name == true) {
+				char thr_name[16];
+				snprintf(thr_name, sizeof(thr_name), "MySQLIdle%d", tn);
+				pthread_setname_np(mysql_threads[tn].thread_id, thr_name);
+			}
 		}
+#endif // defined(__linux__) || defined(__FreeBSD__)
 #endif // IDLE_THREADS
 	}
 	return NULL;
@@ -3127,15 +3144,11 @@ void MySQL_Thread::run_BootstrapListener() {
 		if (n) {
 			poll_listener_add(n);
 			assert(__sync_bool_compare_and_swap(&mypolls.pending_listener_add,n,0));
-		} else {
-			if (GloMTH->bootstrapping_listeners == false) {
-				// we stop looping
-				mypolls.bootstrapping_listeners = false;
-			}
 		}
-#ifdef DEBUG
-		usleep(5+rand()%10);
-#endif
+		// The delay for the active-wait is a fraction of 'poll_timeout'. Since other
+		// threads may be waiting on poll for further operations, checks are meaningless
+		// until that timeout expires (other workers make progress).
+		usleep(std::min(std::max(mysql_thread___poll_timeout/20, 10000), 40000) + (rand() % 2000));
 	}
 }
 
@@ -3238,9 +3251,7 @@ __run_skip_1:
 #endif // IDLE_THREADS
 
 		pthread_mutex_unlock(&thread_mutex);
-		if (unlikely(mypolls.bootstrapping_listeners == true)) {
-			run_BootstrapListener();
-		}
+		run_BootstrapListener();
 
 		// flush mysql log file
 		GloMyLogger->flush();
@@ -3872,7 +3883,7 @@ void MySQL_Thread::ProcessAllSessions_Healthy0(MySQL_Session *sess, unsigned int
 	char _buf[1024];
 	if (sess->client_myds) {
 		if (mysql_thread___log_unhealthy_connections) {
-			if (sess->session_fast_forward == false) {
+			if (sess->session_fast_forward == SESSION_FORWARD_TYPE_NONE) {
 				proxy_warning(
 					"Closing unhealthy client connection %s:%d\n", sess->client_myds->addr.addr,
 					sess->client_myds->addr.port
@@ -4180,6 +4191,7 @@ void MySQL_Thread::refresh_variables() {
 	REFRESH_VARIABLE_INT(poll_timeout);
 	REFRESH_VARIABLE_INT(poll_timeout_on_failure);
 	REFRESH_VARIABLE_BOOL(have_compress);
+	REFRESH_VARIABLE_INT(protocol_compression_level);
 	REFRESH_VARIABLE_BOOL(have_ssl);
 	REFRESH_VARIABLE_BOOL(multiplexing);
 	REFRESH_VARIABLE_BOOL(log_unhealthy_connections);
@@ -4263,6 +4275,8 @@ MySQL_Thread::MySQL_Thread() {
 	mysql_thread___ssl_p2s_cipher=NULL;
 	mysql_thread___ssl_p2s_crl=NULL;
 	mysql_thread___ssl_p2s_crlpath=NULL;
+
+	mysql_thread___protocol_compression_level=3;
 
 	last_maintenance_time=0;
 	last_move_to_idle_thread_time=0;

@@ -609,6 +609,7 @@ enum PGSQL_QUERY_command {
 	PGSQL_QUERY_ALTER_TABLESPACE,
 	PGSQL_QUERY_DROP_TABLESPACE,
 	PGSQL_QUERY_CLUSTER,
+	PGSQL_QUERY_START_REPLICATION,
 	PGSQL_QUERY_UNKNOWN,
 	PGSQL_QUERY__UNINITIALIZED,
 	PGSQL_QUERY___NONE // Special marker.
@@ -647,6 +648,8 @@ enum PROXYSQL_MYSQL_ERR {
 	ER_PROXYSQL_AWS_HEALTH_CHECK_CONN_TIMEOUT         = 9017,
 	ER_PROXYSQL_AWS_HEALTH_CHECK_TIMEOUT              = 9018,
 	ER_PROXYSQL_SRV_NULL_REPLICATION_LAG              = 9019,
+	ER_PROXYSQL_CONNECT_TIMEOUT                       = 9020,
+	ER_PROXYSQL_READONLY_TIMEOUT                      = 9021,
 };
 
 enum proxysql_session_type {
@@ -705,7 +708,8 @@ class SimpleKV;
 class AdvancedKV;
 template <class T>
 class ProxySQL_Poll;
-class Query_Cache;
+class MySQL_Query_Cache;
+class PgSQL_Query_Cache;
 class MySQL_Authentication;
 class MySQL_Connection;
 class PgSQL_Connection;
@@ -1079,6 +1083,30 @@ __thread char* pgsql_thread___firewall_whitelist_errormsg;
 __thread bool pgsql_thread___firewall_whitelist_enabled;
 __thread int pgsql_thread___query_processor_iterations;
 __thread int pgsql_thread___query_processor_regex;
+
+__thread bool pgsql_thread___monitor_enabled;
+__thread int pgsql_thread___monitor_history;
+__thread int pgsql_thread___monitor_connect_interval;
+__thread int pgsql_thread___monitor_connect_interval_window;
+__thread int pgsql_thread___monitor_connect_timeout;
+__thread int pgsql_thread___monitor_ping_interval;
+__thread int pgsql_thread___monitor_ping_interval_window;
+__thread int pgsql_thread___monitor_ping_max_failures;
+__thread int pgsql_thread___monitor_ping_timeout;
+__thread int pgsql_thread___monitor_read_only_interval;
+__thread int pgsql_thread___monitor_read_only_interval_window;
+__thread int pgsql_thread___monitor_read_only_timeout;
+__thread int pgsql_thread___monitor_read_only_max_timeout_count;
+__thread bool pgsql_thread___monitor_writer_is_also_reader;
+__thread int pgsql_thread___monitor_threads;
+__thread char* pgsql_thread___monitor_username;
+__thread char* pgsql_thread___monitor_password;
+__thread char* pgsql_thread___monitor_dbname;
+
+// PgSQL Query Cache
+__thread int pgsql_thread___query_cache_size_MB;
+__thread int pgsql_thread___query_cache_soft_ttl_pct;
+__thread int pgsql_thread___query_cache_handle_warnings;
 //---------------------------
 
 __thread char *mysql_thread___default_schema;
@@ -1140,6 +1168,7 @@ __thread int mysql_thread___poll_timeout;
 __thread int mysql_thread___poll_timeout_on_failure;
 __thread bool mysql_thread___connection_warming;
 __thread bool mysql_thread___have_compress;
+__thread int mysql_thread___protocol_compression_level;
 __thread bool mysql_thread___have_ssl;
 __thread bool mysql_thread___multiplexing;
 __thread bool mysql_thread___log_unhealthy_connections;
@@ -1351,6 +1380,30 @@ extern __thread char* pgsql_thread___firewall_whitelist_errormsg;
 extern __thread bool pgsql_thread___firewall_whitelist_enabled;
 extern __thread int pgsql_thread___query_processor_iterations;
 extern __thread int pgsql_thread___query_processor_regex;
+
+extern __thread bool pgsql_thread___monitor_enabled;
+extern __thread int pgsql_thread___monitor_history;
+extern __thread int pgsql_thread___monitor_connect_interval;
+extern __thread int pgsql_thread___monitor_connect_interval_window;
+extern __thread int pgsql_thread___monitor_connect_timeout;
+extern __thread int pgsql_thread___monitor_ping_interval;
+extern __thread int pgsql_thread___monitor_ping_interval_window;
+extern __thread int pgsql_thread___monitor_ping_max_failures;
+extern __thread int pgsql_thread___monitor_ping_timeout;
+extern __thread int pgsql_thread___monitor_read_only_interval;
+extern __thread int pgsql_thread___monitor_read_only_interval_window;
+extern __thread int pgsql_thread___monitor_read_only_timeout;
+extern __thread int pgsql_thread___monitor_read_only_max_timeout_count;
+extern __thread bool pgsql_thread___monitor_writer_is_also_reader;
+extern __thread int pgsql_thread___monitor_threads;
+extern __thread char* pgsql_thread___monitor_username;
+extern __thread char* pgsql_thread___monitor_password;
+extern __thread char* pgsql_thread___monitor_dbname;
+
+// PgSQL Query Cache
+extern __thread int pgsql_thread___query_cache_size_MB;
+extern __thread int pgsql_thread___query_cache_soft_ttl_pct;
+extern __thread int pgsql_thread___query_cache_handle_warnings;
 //---------------------------
 
 extern __thread char *mysql_thread___default_schema;
@@ -1412,6 +1465,7 @@ extern __thread int mysql_thread___poll_timeout;
 extern __thread int mysql_thread___poll_timeout_on_failure;
 extern __thread bool mysql_thread___connection_warming;
 extern __thread bool mysql_thread___have_compress;
+extern __thread int mysql_thread___protocol_compression_level;
 extern __thread bool mysql_thread___have_ssl;
 extern __thread bool mysql_thread___multiplexing;
 extern __thread bool mysql_thread___log_unhealthy_connections;

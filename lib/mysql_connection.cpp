@@ -779,11 +779,11 @@ void MySQL_Connection::connect_start_SetCharset() {
 		csname = mysql_variables.client_get_value(myds->sess, SQL_CHARACTER_SET);
 	}
 
-	const MARIADB_CHARSET_INFO * c = NULL;
+	MARIADB_CHARSET_INFO * c = NULL;
 	if (csname)
-		c = proxysql_find_charset_nr(atoi(csname));
+		c = (MARIADB_CHARSET_INFO *)proxysql_find_charset_nr(atoi(csname));
 	else
-		c = proxysql_find_charset_name(mysql_thread___default_variables[SQL_CHARACTER_SET]);
+		c = (MARIADB_CHARSET_INFO *)proxysql_find_charset_name(mysql_thread___default_variables[SQL_CHARACTER_SET]);
 
 	if (!c) {
 		// LCOV_EXCL_START
@@ -791,6 +791,21 @@ void MySQL_Connection::connect_start_SetCharset() {
 		assert(0);
 		// LCOV_EXCL_STOP
 	}
+
+	if (c->nr > 255) {
+		const char *csname_default = c->csname;
+		c = NULL;
+		c = (MARIADB_CHARSET_INFO *)proxysql_find_charset_name(csname_default);
+		if (!c) {
+			// LCOV_EXCL_START
+			proxy_error("Not existing charset number %s\n", mysql_thread___default_variables[SQL_CHARACTER_SET]);
+			assert(0);
+			// LCOV_EXCL_STOP
+		}
+	}
+
+
+
 	{
 		/* We are connecting to backend setting charset in mysql_options.
 		 * Client already has sent us a character set and client connection variables have been already set.
@@ -845,7 +860,7 @@ void MySQL_Connection::connect_start_SetClientFlag(unsigned long& client_flags) 
 
 	if (myds != NULL) {
 		if (myds->sess != NULL) {
-			if (myds->sess->session_fast_forward == true) { // this is a fast_forward connection
+			if (myds->sess->session_fast_forward) { // this is a fast_forward connection
 				assert(myds->sess->client_myds != NULL);
 				MySQL_Connection * c = myds->sess->client_myds->myconn;
 				assert(c != NULL);
@@ -1230,7 +1245,7 @@ handler_again:
 				if (mysql->options.use_ssl == 1)
 					if (myds)
 						if (myds->sess != NULL)
-							if (myds->sess->session_fast_forward == true) {
+							if (myds->sess->session_fast_forward) {
 								assert(myds->ssl==NULL);
 								if (myds->ssl == NULL) {
 									// check the definition of P_MARIADB_TLS
@@ -1506,7 +1521,7 @@ handler_again:
 					unsigned int buffered_data=0;
 					buffered_data = myds->sess->client_myds->PSarrayOUT->len * RESULTSET_BUFLEN;
 					buffered_data += myds->sess->client_myds->resultset->len * RESULTSET_BUFLEN;
-					if (buffered_data > (unsigned int)mysql_thread___threshold_resultset_size*8) {
+					if (buffered_data > overflow_safe_multiply<8,unsigned int>(mysql_thread___threshold_resultset_size)) {
 						next_event(ASYNC_STMT_EXECUTE_STORE_RESULT_CONT); // we temporarily pause . See #1232
 						break;
 					}
@@ -1531,9 +1546,15 @@ handler_again:
 					}
 					if (rows_read_inner > 1) {
 						process_rows_in_ASYNC_STMT_EXECUTE_STORE_RESULT_CONT(processed_bytes);
+						bool suspend_resultset_fetch = (processed_bytes > overflow_safe_multiply<8,unsigned int>(mysql_thread___threshold_resultset_size));
+
+						if (suspend_resultset_fetch == true && myds->sess && myds->sess->qpo && myds->sess->qpo->cache_ttl > 0) {
+							suspend_resultset_fetch = (processed_bytes > ((uint64_t)mysql_thread___query_cache_size_MB) * 1024ULL * 1024ULL);
+						}
+
 						if (
-							(processed_bytes > (unsigned int)mysql_thread___threshold_resultset_size*8)
-								||
+							suspend_resultset_fetch
+							||
 							( mysql_thread___throttle_ratio_server_to_client && mysql_thread___throttle_max_bytes_per_second_to_client && (processed_bytes > (unsigned long long)mysql_thread___throttle_max_bytes_per_second_to_client/10*(unsigned long long)mysql_thread___throttle_ratio_server_to_client) )
 						) {
 							next_event(ASYNC_STMT_EXECUTE_STORE_RESULT_CONT); // we temporarily pause
@@ -1685,7 +1706,7 @@ handler_again:
 					unsigned int buffered_data=0;
 					buffered_data = myds->sess->client_myds->PSarrayOUT->len * RESULTSET_BUFLEN;
 					buffered_data += myds->sess->client_myds->resultset->len * RESULTSET_BUFLEN;
-					if (buffered_data > (unsigned int)mysql_thread___threshold_resultset_size*8) {
+					if (buffered_data > overflow_safe_multiply<8,unsigned int>(mysql_thread___threshold_resultset_size)) {
 						next_event(ASYNC_USE_RESULT_CONT); // we temporarily pause . See #1232
 						break;
 					}
@@ -1738,9 +1759,16 @@ handler_again:
 					myds->bytes_info.bytes_recv += br;
 					bytes_info.bytes_recv += br;
 					processed_bytes+=br;	// issue #527 : this variable will store the amount of bytes processed during this event
+
+					bool suspend_resultset_fetch = (processed_bytes > overflow_safe_multiply<8,unsigned int>(mysql_thread___threshold_resultset_size));
+
+					if (suspend_resultset_fetch == true && myds->sess && myds->sess->qpo && myds->sess->qpo->cache_ttl > 0) {
+						suspend_resultset_fetch = (processed_bytes > ((uint64_t)mysql_thread___query_cache_size_MB) * 1024ULL * 1024ULL);
+					}
+
 					if (
-						(processed_bytes > (unsigned int)mysql_thread___threshold_resultset_size*8)
-							||
+						suspend_resultset_fetch
+						||
 						( mysql_thread___throttle_ratio_server_to_client && mysql_thread___throttle_max_bytes_per_second_to_client && (processed_bytes > (unsigned long long)mysql_thread___throttle_max_bytes_per_second_to_client/10*(unsigned long long)mysql_thread___throttle_ratio_server_to_client) )
 					) {
 						next_event(ASYNC_USE_RESULT_CONT); // we temporarily pause

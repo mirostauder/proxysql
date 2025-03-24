@@ -164,6 +164,7 @@ static char* commands_counters_desc[PGSQL_QUERY___NONE] = {
 	[PGSQL_QUERY_ALTER_TABLESPACE] = (char*)"ALTER_TABLESPACE",
 	[PGSQL_QUERY_DROP_TABLESPACE] = (char*)"DROP_TABLESPACE",
 	[PGSQL_QUERY_CLUSTER] = (char*)"PGSQL_QUERY_CLUSTER",
+	[PGSQL_QUERY_START_REPLICATION] = (char*)"START_REPLICATION",
 	[PGSQL_QUERY_UNKNOWN] = (char*)"UNKNOWN",
 };
 
@@ -642,7 +643,7 @@ SQLite3_result* PgSQL_Query_Processor::get_stats_commands_counters() {
 	result->add_column_definition(SQLITE_TEXT, "cnt_5s");
 	result->add_column_definition(SQLITE_TEXT, "cnt_10s");
 	result->add_column_definition(SQLITE_TEXT, "cnt_INFs");
-	for (int i = 0; i < MYSQL_COM_QUERY__UNINITIALIZED; i++) {
+	for (int i = 0; i < PGSQL_QUERY__UNINITIALIZED; i++) {
 		char** pta = commands_counters[i]->get_row();
 		result->add_row(pta);
 		commands_counters[i]->free_row(pta);
@@ -1102,6 +1103,10 @@ __remove_parenthesis:
 		if (!strcasecmp("START", token)) {
 			token = (char*)tokenize(&tok);
 			if (token != NULL && !strcasecmp("TRANSACTION", token)) ret = PGSQL_QUERY_BEGIN;
+			break;
+		}
+		if (!strcasecmp("START_REPLICATION", token)) {
+			ret = PGSQL_QUERY_START_REPLICATION;
 			break;
 		}
 		break;

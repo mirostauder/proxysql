@@ -249,7 +249,7 @@ bool MySQL_Protocol::generate_pkt_ERR(bool send, void **ptr, unsigned int *len, 
 			case STATE_OK:
 				break;
 			case STATE_SLEEP:
-				if ((*myds)->sess->session_fast_forward==true) { // see issue #733
+				if ((*myds)->sess->session_fast_forward) { // see issue #733
 					break;
 				}
 			default:
@@ -1173,6 +1173,7 @@ bool MySQL_Protocol::generate_pkt_initial_handshake(bool send, void **ptr, unsig
 	return true;
 }
 
+#ifdef PROXYSQLCLICKHOUSE
 void ch_account_to_my(account_details_t& account, ch_account_details_t& ch_account) {
     account.username = ch_account.username;
     account.password = ch_account.password;
@@ -1196,6 +1197,7 @@ void ch_account_to_my(account_details_t& account, ch_account_details_t& ch_accou
     account.attributes = nullptr;                 // No attributes by default
     account.comment = nullptr;                    // No comment by default
 }
+#endif /* PROXYSQLCLICKHOUSE */
 
 bool MySQL_Protocol::process_pkt_auth_swich_response(unsigned char *pkt, unsigned int len) {
 	bool ret=false;
@@ -1593,6 +1595,10 @@ int MySQL_Protocol::PPHR_1(unsigned char *pkt, unsigned int len, bool& ret, MyPr
 
 // this function was inline in process_pkt_handshake_response() , split for readibility
 bool MySQL_Protocol::PPHR_2(unsigned char *pkt, unsigned int len, bool& ret, MyProt_tmp_auth_vars& vars1) { // process_pkt_handshake_response inner 2
+
+	// if packet length is less than 4, it's a malformed packet.
+	if ((len - sizeof(mysql_hdr)) < 4) return false;
+
 	vars1.capabilities = CPY4(pkt);
 	// see bug #2916. If CLIENT_MULTI_STATEMENTS is set by the client
 	// we enforce setting CLIENT_MULTI_RESULTS, this is the proper and expected
@@ -1829,9 +1835,9 @@ void MySQL_Protocol::PPHR_5passwordTrue(
 #endif
 	(*myds)->sess->schema_locked = attr1.schema_locked;
 	(*myds)->sess->transaction_persistent = attr1.transaction_persistent;
-	(*myds)->sess->session_fast_forward=false; // default
+	(*myds)->sess->session_fast_forward=SESSION_FORWARD_TYPE_NONE; // default
 	if ((*myds)->sess->session_type == PROXYSQL_SESSION_MYSQL) {
-		(*myds)->sess->session_fast_forward = attr1.fast_forward;
+		(*myds)->sess->session_fast_forward = attr1.fast_forward ? SESSION_FORWARD_TYPE_PERMANENT : SESSION_FORWARD_TYPE_NONE;
 	}
 	(*myds)->sess->user_max_connections = attr1.max_connections;
 }
@@ -1850,7 +1856,7 @@ void MySQL_Protocol::PPHR_5passwordFalse_0(
 			(*myds)->sess->default_schema=strdup((char *)"main"); // just the pointer is passed
 			(*myds)->sess->schema_locked=false;
 			(*myds)->sess->transaction_persistent=false;
-			(*myds)->sess->session_fast_forward=false;
+			(*myds)->sess->session_fast_forward=SESSION_FORWARD_TYPE_NONE;
 			(*myds)->sess->user_max_connections=0;
 			vars1.password=l_strdup(mysql_thread___monitor_password);
 			ret=true;
@@ -1901,7 +1907,7 @@ void MySQL_Protocol::PPHR_5passwordFalse_auth2(
 #endif
 			(*myds)->sess->schema_locked=attr1.schema_locked;
 			(*myds)->sess->transaction_persistent=attr1.transaction_persistent;
-			(*myds)->sess->session_fast_forward=attr1.fast_forward;
+			(*myds)->sess->session_fast_forward=attr1.fast_forward ? SESSION_FORWARD_TYPE_PERMANENT : SESSION_FORWARD_TYPE_NONE;
 			(*myds)->sess->user_max_connections=attr1.max_connections;
 			if (strcmp(vars1.password, (char *) vars1.pass) == 0) {
 				if (backend_username) {
@@ -1926,7 +1932,7 @@ void MySQL_Protocol::PPHR_5passwordFalse_auth2(
 #endif
 						(*myds)->sess->schema_locked=attr1.schema_locked;
 						(*myds)->sess->transaction_persistent=attr1.transaction_persistent;
-						(*myds)->sess->session_fast_forward=attr1.fast_forward;
+						(*myds)->sess->session_fast_forward=attr1.fast_forward ? SESSION_FORWARD_TYPE_PERMANENT : SESSION_FORWARD_TYPE_NONE;
 						(*myds)->sess->user_max_connections=attr1.max_connections;
 						char *tmp_user=strdup((const char *)acct.username);
 						userinfo->set(backend_username, NULL, NULL, NULL);

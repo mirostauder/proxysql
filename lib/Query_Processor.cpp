@@ -30,12 +30,6 @@ using json = nlohmann::json;
 #define GET_THREAD_VARIABLE(VARIABLE_NAME) \
 ({((std::is_same_v<QP_DERIVED,MySQL_Query_Processor>) ? mysql_thread___##VARIABLE_NAME : pgsql_thread___##VARIABLE_NAME) ;})
 
-template
-class Query_Processor<MySQL_Query_Processor>;
-
-template
-class Query_Processor<PgSQL_Query_Processor>;
-
 extern MySQL_Threads_Handler *GloMTH;
 extern PgSQL_Threads_Handler* GloPTH;
 extern ProxySQL_Admin *GloAdmin;
@@ -68,7 +62,7 @@ static bool rules_sort_comp_function (QP_rule_t * a, QP_rule_t * b) {
 }
 
 static unsigned long long mem_used_rule(QP_rule_t *qr) {
-	unsigned long long s = sizeof(QP_rule_t);
+	unsigned long long s = 0;
 	if (qr->username)
 		s+=strlen(qr->username);
 	if (qr->schemaname)
@@ -384,6 +378,7 @@ bool Query_Processor<QP_DERIVED>::insert(QP_rule_t *qr, bool lock) {
 	if (lock)
 		wrlock();
 	rules.push_back(qr);
+	rules_mem_used += sizeof(TypeQueryRule);
 	rules_mem_used += mem_used_rule(qr);
 	if (lock)
 		wrunlock();
@@ -546,7 +541,7 @@ void * get_query_digests_total_size_parallel(void *_arg) {
 	unsigned long long i = 0;
 	unsigned long long m = arg->m;
 	unsigned long long ret = 0;
-	set_thread_name("GetQueryDigeTot");
+	set_thread_name("GetQueryDigeTot", GloVars.set_thread_name);
 	for (std::unordered_map<uint64_t, void *>::iterator it=arg->gu->begin(); it!=arg->gu->end(); ++it) {
 		if ((i%DIGEST_STATS_FAST_THREADS)==m) {
 			QP_query_digest_stats *qds=(QP_query_digest_stats *)it->second;
@@ -582,7 +577,7 @@ void * get_query_digests_parallel(void *_arg) {
 	unsigned long long i = 0;
 	unsigned long long m = arg->m;
 	unsigned long long ret = 0;
-	set_thread_name("GetQueryDigests");
+	set_thread_name("GetQueryDigests", GloVars.set_thread_name);
 	if (arg->free_me) {
 		if (arg->defer_free) {
 			size_t map_size = arg->gu->size();
@@ -630,7 +625,7 @@ void * purge_query_digests_parallel(void *_arg) {
 	unsigned long long i = 0;
 	unsigned long long r = 0;
 	unsigned long long m = arg->m;
-	set_thread_name("PurgeQueryDgest");
+	set_thread_name("PurgeQueryDgest", GloVars.set_thread_name);
 	for (std::unordered_map<uint64_t, void *>::iterator it=arg->gu->begin(); it!=arg->gu->end(); ++it) {
 		if ((i%DIGEST_STATS_FAST_THREADS)==m) {
 			QP_query_digest_stats *qds=(QP_query_digest_stats *)it->second;
@@ -2435,3 +2430,8 @@ void Query_Processor_Output::get_info_json(json& j) {
 	j["retries"] = retries;
 	j["max_lag_ms"] = max_lag_ms;
 }
+template
+class Query_Processor<MySQL_Query_Processor>;
+
+template
+class Query_Processor<PgSQL_Query_Processor>;

@@ -77,6 +77,8 @@ using json = nlohmann::json;
 #include <uuid/uuid.h>
 
 #include "PgSQL_Protocol.h"
+#include "MySQL_Query_Cache.h"
+#include "PgSQL_Query_Cache.h"
 //#include "usual/time.h"
 
 using std::string;
@@ -307,7 +309,8 @@ bool admin_proxysql_mysql_paused = false;
 bool admin_proxysql_pgsql_paused = false;
 int admin_old_wait_timeout;
 
-extern Query_Cache *GloQC;
+extern MySQL_Query_Cache *GloMyQC;
+extern PgSQL_Query_Cache* GloPgQC;
 extern MySQL_Authentication *GloMyAuth;
 extern PgSQL_Authentication *GloPgAuth;
 extern MySQL_LDAP_Authentication *GloMyLdapAuth;
@@ -1114,6 +1117,7 @@ void ProxySQL_Admin::flush_logs() {
 		}
 		free(ssl_keylog_file);
 	}
+	proxy_debug(PROXY_DEBUG_ADMIN, 1, "Running PROXYSQL FLUSH LOGS\n");
 }
 
 
@@ -2231,7 +2235,7 @@ void * admin_main_loop(void *arg) {
 	int *callback_func=((struct _main_args *)arg)->callback_func;
 	volatile int *shutdown=((struct _main_args *)arg)->shutdown;
 	char *socket_names[MAX_ADMIN_LISTENERS];
-	set_thread_name("Admin");
+	set_thread_name("Admin", GloVars.set_thread_name);
 	for (i=0;i<MAX_ADMIN_LISTENERS;i++) { socket_names[i]=NULL; }
 	pthread_attr_t attr;
   pthread_attr_init(&attr);
@@ -2328,8 +2332,8 @@ __end_while_pool:
 				}
 			}
 			if (GloProxyStats->MySQL_Query_Cache_timetoget(curtime)) {
-				if (GloQC) {
-					SQLite3_result * resultset=GloQC->SQL3_getStats();
+				if (GloMyQC) {
+					SQLite3_result * resultset=GloMyQC->SQL3_getStats();
 					if (resultset) {
 						GloProxyStats->MySQL_Query_Cache_sets(resultset);
 						delete resultset;
@@ -2502,9 +2506,13 @@ void update_modules_metrics() {
 	if (GloMyMon) {
 		GloMyMon->p_update_metrics();
 	}
-	// Update query_cache metrics
-	if (GloQC) {
-		GloQC->p_update_metrics();
+	// Update mysql query_cache metrics
+	if (GloMyQC) {
+		GloMyQC->p_update_metrics();
+	}
+	// Update pgsql query_cache metrics
+	if (GloPgQC) {
+		GloPgQC->p_update_metrics();
 	}
 	// Update cluster metrics
 	if (GloProxyCluster) {
@@ -5626,6 +5634,7 @@ void ProxySQL_Admin::send_error_msg_to_client(S* sess, const char *msg, uint16_t
 	} else if constexpr (std::is_same_v<S, PgSQL_Session>) {
 		// Code for PostgreSQL clients
 		PgSQL_Data_Stream* myds = sess->client_myds;
+		myds->DSS = STATE_QUERY_SENT_DS;
 		char* new_msg = (char*)malloc(strlen(msg) + sizeof(prefix_msg));
 		sprintf(new_msg, "%s%s", prefix_msg, msg);
 		myds->myprot.generate_error_packet(true, true, new_msg, PGSQL_ERROR_CODES::ERRCODE_RAISE_EXCEPTION, false);

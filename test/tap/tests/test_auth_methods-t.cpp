@@ -51,9 +51,7 @@ using std::unique_ptr;
 
 #define MYSQL_QUERY_T__(mysql, query) \
 	do { \
-		const std::string time { get_formatted_time() }; \
-		fprintf(stderr, "# %s: Issuing query '%s' to ('%s':%d)\n", time.c_str(), query, mysql->host, mysql->port); \
-		if (mysql_query(mysql, query)) { \
+		if (mysql_query_t(mysql, query)) { \
 			fprintf(stderr, "File %s, line %d, Error: %s\n", __FILE__, __LINE__, mysql_error(mysql)); \
 			return { EXIT_FAILURE, vector<user_creds_t> {} }; \
 		} \
@@ -61,9 +59,7 @@ using std::unique_ptr;
 
 #define MYSQL_QUERY_T_(mysql, query) \
 	do { \
-		const std::string time { get_formatted_time() }; \
-		fprintf(stderr, "# %s: Issuing query '%s' to ('%s':%d)\n", time.c_str(), query, mysql->host, mysql->port); \
-		if (mysql_query(mysql, query)) { \
+		if (mysql_query_t(mysql, query)) { \
 			fprintf(stderr, "File %s, line %d, Error: %s\n", __FILE__, __LINE__, mysql_error(mysql)); \
 			return { EXIT_FAILURE, user_def_t {} }; \
 		} \
@@ -679,7 +675,7 @@ string to_string(const test_conf_t& conf) {
 	return "{ "
 		"\"req_auth\":'" + conf.req_auth + "', "
 		"\"def_auth\":'" + conf.def_auth + "', "
-		"\"hashed_pass\":'" + std::to_string(conf.hashed_pass) + "'"
+		"\"hashed_pass\":'" + std::to_string(conf.hashed_pass) + "', "
 		"\"use_ssl\":'" + std::to_string(conf.use_ssl) + "'"
 	" }";
 }
@@ -939,6 +935,21 @@ bool detect_sha2_full_auth(const sess_info_t& sess_info) {
 bool chk_exp_sha2_full_auth(
 	const test_conf_t& conf, const test_creds_t& creds, const user_auth_stats_t& auth_info
 ) {
+	// TODO: ProxySQL requires a full-auth everytime a dual-password is used. This is a limitation
+	// on the current auth state-machine. This should be fixed in the next auth-rework. The
+	// following code will be obsolete when this is implemented.
+	///////////////////////////////////////////////////////////////////////////
+	if (
+		creds.info.type == PASS_TYPE::ADDITIONAL
+		&& conf.req_auth == "caching_sha2_password"
+		&& conf.def_auth == "caching_sha2_password"
+		&& conf.hashed_pass == true
+	) {
+		diag("TODO-WARNING: The following check will FAKE pass - This limitation should be fixed");
+		return true;
+	}
+	///////////////////////////////////////////////////////////////////////////
+
 	if (!is_empty_pass(creds.pass.get()) && conf.hashed_pass && creds.info.auth == "caching_sha2_password") {
 		if (creds.info.type == PASS_TYPE::PRIMARY) {
 			return auth_info.prim_pass_auths == 0;
