@@ -14,7 +14,7 @@ on:
         type: string
 
 env:
-  TESTTREE: ${{ inputs.testtree || inputs.trigger.event.inputs.testtree || 'main' }}
+  TESTTREE: ${{ 'results_parsing_fixes' || inputs.testtree || inputs.trigger.event.inputs.testtree || 'main' }}
   TESTNAME: laravel-framework
   TESTDIST: debian12
   SHA: ${{ inputs.trigger && fromJson(inputs.trigger).event.workflow_run.head_sha || github.sha }}
