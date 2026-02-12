@@ -16,7 +16,7 @@ env:
 jobs:
 
 #  lock:
-#    runs-on: ubuntu-22.04
+#    runs-on: ubuntu-24.04
 #    env:
 #      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #
@@ -235,7 +235,7 @@ jobs:
         details_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
 
 #  unlock:
-#    runs-on: ubuntu-22.04
+#    runs-on: ubuntu-24.04
 #    if: ${{ always() }}
 #    needs: [ builds ]
 #    env:

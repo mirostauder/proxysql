@@ -15,7 +15,7 @@ env:
 
 jobs:
   select:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     strategy:
@@ -82,7 +82,7 @@ jobs:
         echo "matrix=$(cat proxysql/tap-matrix-$TAPGROUP.json)" >> $GITHUB_OUTPUT
 
   tests:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: [ "select" ]
     strategy:
       fail-fast: false

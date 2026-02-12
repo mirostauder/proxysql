@@ -13,7 +13,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
@@ -152,7 +152,7 @@ jobs:
 
 
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: [ build ]
     strategy:
       fail-fast: false
