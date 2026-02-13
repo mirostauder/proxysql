@@ -98,6 +98,7 @@ jobs:
         #echo "==================================="
         #cat /proc/sys/kernel/core_pattern
         #echo "==================================="
+        apt install -y postgresql-client
         
         cd proxysql_3p_testing/
         ./setup.sh test_${{ env.TESTNAME }}/${{ env.TESTNAME }}
