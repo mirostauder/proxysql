@@ -108,6 +108,7 @@ jobs:
         # use cached build
         rm -rf ./proxysql && mv ../proxysql . || true
         ls -l proxysql/binaries/
+        git -C ./proxysql describe --long --abbrev=7 
 
     - name: Run tests
       run: |

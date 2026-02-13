@@ -104,7 +104,9 @@ jobs:
 
         # use cached build
         rm -rf ./proxysql && mv ../proxysql . || true
-
+        ls -l proxysql/binaries/
+        git -C ./proxysql describe --long --abbrev=7
+        
         # extend timout
         cd test_${{ env.TESTNAME }}
         sed -i 's/timeout -v -s1 800 //' run-tests.bash
