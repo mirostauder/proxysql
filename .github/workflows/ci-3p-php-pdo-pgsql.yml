@@ -92,7 +92,8 @@ jobs:
       run: |
         set +e
         
-        apt install -y postgresql-client
+        sudo apt update
+        sudo apt install -y postgresql-client
 
         cd proxysql_3p_testing/
         ./setup.sh test_${{ env.TESTNAME }}/php-src
