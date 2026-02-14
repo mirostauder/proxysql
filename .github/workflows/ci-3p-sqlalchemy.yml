@@ -132,7 +132,7 @@ jobs:
         GHUSER="$(id -u):$(id -g)"
         sudo chown -R ${GHUSER} ./logs
         cat ./logs/*_summary.log || true
-        FAILS=$(cat ./logs/*_summary.log | grep -oP '(?<=^FAIL: )\d+')
+        FAILS=$(cat ./logs/*/*_summary.log | grep -oP '(?<=^FAIL: )\d+')
         
         STATUS='PASS'
         [[ -z ${FAILS} ]] && STATUS='ERROR'
@@ -163,12 +163,15 @@ jobs:
       if: always()
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        check_id: ${{ steps.checks.outputs.check_id }}
+#        check_id: ${{ steps.checks.outputs.check_id }}
+        name: ${{ github.workflow }}
         repo: ${{ github.repository }}
         sha: ${{ env.SHA }}
         conclusion: ${{ job.status }}
 #        action_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
         details_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+        output: |
+          {"summary":"${{ steps.check_baseline.outputs.summary }}"}
 
 
   summarize:
@@ -185,6 +188,6 @@ jobs:
           remove-artifact: true
       
       - name: Output summary
-        run:
+        run: |
           #echo '${{ steps.collect.outputs.result }}' | jq -c '.[]' | sort
           echo '${{ steps.collect.outputs.result }}' | jq -c '.[]' | sort >> $GITHUB_STEP_SUMMARY

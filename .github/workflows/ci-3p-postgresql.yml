@@ -112,7 +112,7 @@ jobs:
         rm -rf ./proxysql && mv ../proxysql . || true
         ls -l proxysql/binaries/
         git -C ./proxysql describe --long --abbrev=7
-                
+
         # set tested database infra
         #sed -i 's/^fn_test_proxysql m/#fn_test_proxysql m/' run-tests.bash
         #sed -i 's/^fn_test_proxysql_dev m/#fn_test_proxysql_dev m/' run-tests.bash
@@ -129,7 +129,11 @@ jobs:
         
         #sudo chmod -R 777 ${{ github.workspace }}/*
         exit $RC
-        
+    
+    - name: Output summary
+      run: |
+        cat ./logs/*/*_summary.log >> $GITHUB_STEP_SUMMARY
+    
     - name: Check baseline
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
