@@ -59,7 +59,6 @@ jobs:
         sparse-checkout: |
           common
           libs
-          infra-docker-hoster
           test_${{ env.TESTNAME }}
 #          proxysql
 
@@ -98,8 +97,6 @@ jobs:
         #echo "==================================="
         #cat /proc/sys/kernel/core_pattern
         #echo "==================================="
-        sudo apt update
-        sudo apt install -y postgresql-client
 
         cd proxysql_3p_testing/
         ./setup.sh test_${{ env.TESTNAME }}/${{ env.TESTNAME }}

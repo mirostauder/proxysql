@@ -62,7 +62,6 @@ jobs:
         sparse-checkout: |
           common
           libs
-          infra-docker-hoster
           test_${{ env.TESTNAME }}
 #          proxysql
 
