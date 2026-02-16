@@ -88,17 +88,29 @@ jobs:
       matrix:
         testdist: [ 'ubuntu22-tap' ]
 #        infradb: [ 'mysql57', 'mysql80', 'mysql81', 'mysql82', 'mariadb10', 'mariadb11' ]
-        infradb: [ 'mysql57' ]
+#        infradb: [ 'mysql57' ]
 #        testgroup: [ '.*admin.*-t|.*basic.*-t|.*charset.*-t|.*firewall.*-t|.*kill.*-t|.*max.*-t', 'multiple.*-t', '.*mysql.*-t', '.*prepare.*-t', 'reg_test.*-t', 'save.*-t', '.*set.*-t', '.*sqlite.*-t', '.*ssl.*-t', 'test_.*-t' ]
 #        testgroup: [ '' ]
 #        testgroup: [ 'kill_connection3-t', 'reg_test_3847_admin_lock-t', 'set_testing-240-t', 'max_connections_ff-t', 'test_server_sess_status-t' ]
-        testgroup: ${{ fromJson(needs.select.outputs.matrix) }}
+#        testgroup: ${{ fromJson(needs.select.outputs.matrix) }}
+        tapgroup: ["default-g1", "default-g2", "default-g3", "default-g4",
+                    "mysql84-g1", "mysql84-gr-g1",
+                    "mysql90-g1", "mysql90-gr-g1",
+                    "mysql91-g1", "mysql91-gr-g1",
+                    "mysql92-g1", "mysql92-gr-g1",
+                    "mysql93-g1", "mysql93-gr-g1",
+                    "mysql-auto_increment_delay_multiplex=0-g1", "mysql-auto_increment_delay_multiplex=0-g2", "mysql-auto_increment_delay_multiplex=0-g3", "mysql-auto_increment_delay_multiplex=0-g4",
+                    "mysql-multiplexing=false-g1", "mysql-multiplexing=false-g2", "mysql-multiplexing=false-g3", "mysql-multiplexing=false-g4",
+                    "mysql-query_digests=0-g1", "mysql-query_digests=0-g2", "mysql-query_digests=0-g3", "mysql-query_digests=0-g4",
+                    "mysql-query_digests_keep_comment=1-g1", "mysql-query_digests_keep_comment=1-g2", "mysql-query_digests_keep_comment=1-g3", "mysql-query_digests_keep_comment=1-g4"
+                    ]
     env:
       TESTDIST: ${{ matrix.testdist }}
-      INFRADB:  ${{ matrix.infradb }}
-      TESTGROUP: ${{ matrix.testgroup }}
+#      INFRADB:  ${{ matrix.infradb }}
+#      TESTGROUP: ${{ matrix.testgroup }}
       BLDCACHE: ${{ inputs.trigger && fromJson(inputs.trigger).event.workflow_run.head_sha || github.sha }}_${{ matrix.testdist }}
-      MATRIX: '(${{ matrix.testgroup }})'
+      MATRIX: '(${{ matrix.tapgroup }})'
+      TAPGROUP: '(${{ matrix.tapgroup }})'
 
     steps:
 
@@ -187,7 +199,7 @@ jobs:
         #mkdir test
         
         # select tests
-        echo 'export TAP_WORKDIR="$WORKSPACE/test/tap/${{ matrix.testgroup }}/"' >> test/env.sh
+        echo 'export TAP_GROUP="${{ matrix.tapgroup }}"' >> test/env.sh
         echo "export TEST_PY_INTERNAL=0" >> test/env.sh
         echo "export TEST_PY_BENCHMARK=0" >> test/env.sh
         echo "export TEST_PY_CHUSER=0" >> test/env.sh
@@ -333,14 +345,14 @@ jobs:
         ./docker-compose-destroy.bash
         
         sudo chmod -R 777 ${{ github.workspace }}/*
-        echo "${{ matrix.testgroup }}" | tr -d '*|' | sed 's|.*/||' | xargs -0 printf 'TESTGROUP=%s' >> $GITHUB_ENV
+        echo "${{ matrix.tapgroup }}" | tr -d '*|' | sed 's|.*/||' | xargs -0 printf 'TESTGROUP=%s' >> $GITHUB_ENV
           
     - name: Archive artifacts logs
 #      if: ${{ failure() && !cancelled() }}
       if: ${{ failure() || cancelled() }}
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.workflow }}-${{ env.SHA }}-logs-run#${{ github.run_number }}-${{ env.TESTGROUP }}
+        name: ${{ github.workflow }}-${{ env.SHA }}-logs-run#${{ github.run_number }}-${{ env.TAPGROUP }}
         path: |
           proxysql/ci_*_logs/
 
@@ -349,7 +361,7 @@ jobs:
       if: ${{ failure() || cancelled() }}
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.workflow }}-${{ env.SHA }}-bins-run#${{ github.run_number }}-${{ env.TESTGROUP }}
+        name: ${{ github.workflow }}-${{ env.SHA }}-bins-run#${{ github.run_number }}-${{ env.TAPGROUP }}
         path: |
           proxysql/binaries/
           proxysql/src/
@@ -361,7 +373,7 @@ jobs:
       if: ${{ failure() || cancelled() }}
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.workflow }}-${{ env.SHA }}-tests-run#${{ github.run_number }}-${{ env.TESTGROUP }}
+        name: ${{ github.workflow }}-${{ env.SHA }}-tests-run#${{ github.run_number }}-${{ env.TAPGROUP }}
         path: |
           proxysql/test/tap/tests*
     
