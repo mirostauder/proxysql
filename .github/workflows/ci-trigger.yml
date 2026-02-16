@@ -30,16 +30,10 @@ jobs:
         RUNID=$(gh -R ${{ github.repository }} run list -w CI-builds -s in_progress | grep -P "${RUNNAME1}|${RUNNAME2}|${RUNNAME3}" | grep -Po '(?<=workflow_run)\s+\d+')
         while [[ -z ${RUNID} ]]; do
           sleep 5
+          gh -R ${{ github.repository }} run list -w CI-builds -s in_progress | grep -P "${RUNNAME1}|${RUNNAME2}|${RUNNAME3}"
           RUNID=$(gh -R ${{ github.repository }} run list -w CI-builds -s in_progress | grep -P "${RUNNAME1}|${RUNNAME2}|${RUNNAME3}" | grep -Po '(?<=workflow_run)\s+\d+')
         done
-        
-        
-        
-        
-        
-        
-        
-        echo ${RUNID}
+        echo "${RUNID}"
         #echo "Got run id: '${RUNNAME1}|${RUNNAME2}|${RUNNAME3}' : '${RUNID}'"
         
         #echo "Trigger workflow_run[in_progress]: '${RUNNAME1}|${RUNNAME2}|${RUNNAME3}'"
