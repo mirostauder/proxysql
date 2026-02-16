@@ -20,7 +20,7 @@ jobs:
         set +e
         #set -x
 
-        #echo "{{ toJson(github.event.pull_request.head) }}"
+        #echo "toJson(github.event.pull_request.head)"
 
         RUNNAME1="${{ github.event.after || github.sha }}"
         RUNNAME2="${{ github.event.pull_request.head.sha || github.sha }}"
@@ -32,7 +32,15 @@ jobs:
           sleep 5
           RUNID=$(gh -R ${{ github.repository }} run list -w CI-builds -s in_progress | grep -P "${RUNNAME1}|${RUNNAME2}|${RUNNAME3}" | grep -Po '(?<=workflow_run)\s+\d+')
         done
-        echo "Got run id: '${RUNNAME1}|${RUNNAME2}|${RUNNAME3}' : '${RUNID}'"
+        
+        
+        
+        
+        
+        
+        
+        echo ${RUNID}
+        #echo "Got run id: '${RUNNAME1}|${RUNNAME2}|${RUNNAME3}' : '${RUNID}'"
         
         #echo "Trigger workflow_run[in_progress]: '${RUNNAME1}|${RUNNAME2}|${RUNNAME3}'"
         sleep 5
