@@ -16,7 +16,7 @@ jobs:
         set +e
         #set -x
 
-        echo "${{ fromJson(github) }}"
+        echo "${{ toJson(github) }}"
 
         RUNNAME1="${{ github.head_ref || github.ref_name }} CI-builds ${{ github.event.after || github.sha }}"
         RUNNAME2="${{ github.head_ref || github.ref_name }} CI-builds ${{ github.sha }}"
