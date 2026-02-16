@@ -6,7 +6,7 @@
 ### when not available, specify GIT_VERSION on commnad line:
 ###
 ### ```
-### export GIT_VERSION=3.x.y-dev a
+### export GIT_VERSION=3.x.y-dev ab
 ### ```
 
 GIT_VERSION ?= $(shell git describe --long --abbrev=7 2>/dev/null || git describe --long --abbrev=7 --always)
