@@ -16,6 +16,8 @@ jobs:
         set +e
         #set -x
 
+        echo "${{ github }}"
+
         RUNNAME1="${{ github.head_ref || github.ref_name }} CI-builds ${{ github.event.after || github.sha }}"
         RUNNAME2="${{ github.head_ref || github.ref_name }} CI-builds ${{ github.sha }}"
         echo "Get run id: '${RUNNAME1}|${RUNNAME2}' ..."
