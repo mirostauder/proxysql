@@ -20,12 +20,12 @@ jobs:
         set +e
         #set -x
 
-        #echo "toJson(github.event.pull_request.head)"
+        #echo "${{ toJson(github.event.pull_request.head) }}"
 
         RUNNAME1="${{ github.event.after || github.sha }}"
         RUNNAME2="${{ github.event.pull_request.head.sha || github.sha }}"
         RUNNAME3="${{ github.sha }}"
-        echo "Get run id: '${RUNNAME1}|${RUNNAME2|${RUNNAME3}' ..."
+        echo "Get run id: '${RUNNAME1}|${RUNNAME2}|${RUNNAME3}' ..."
         sleep 5
         RUNID=$(gh -R ${{ github.repository }} run list -w CI-builds -s in_progress | grep -P "${RUNNAME1}|${RUNNAME2}|${RUNNAME3}" | grep -Po '(?<=workflow_run)\s+\d+')
         while [[ -z ${RUNID} ]]; do
@@ -33,10 +33,9 @@ jobs:
           gh -R ${{ github.repository }} run list -w CI-builds -s in_progress | grep -P "${RUNNAME1}|${RUNNAME2}|${RUNNAME3}"
           RUNID=$(gh -R ${{ github.repository }} run list -w CI-builds -s in_progress | grep -P "${RUNNAME1}|${RUNNAME2}|${RUNNAME3}" | grep -Po '(?<=workflow_run)\s+\d+')
         done
-        echo "${RUNID}"
-        #echo "Got run id: '${RUNNAME1}|${RUNNAME2}|${RUNNAME3}' : '${RUNID}'"
+        echo "Got run id: '${RUNNAME1}|${RUNNAME2}|${RUNNAME3}' : '${RUNID}'"
         
-        #echo "Trigger workflow_run[in_progress]: '${RUNNAME1}|${RUNNAME2}|${RUNNAME3}'"
+        echo "Trigger workflow_run[in_progress]: '${RUNNAME1}|${RUNNAME2}|${RUNNAME3}'"
         sleep 5
         # this blocks until the run is finished
         gh -R ${{ github.repository }} run watch -i 30 ${RUNID} >/dev/null
