@@ -9,6 +9,10 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
+    - name: Wait
+      run: |
+        sleep 10
+
     - name: Trigger workflow_run[in_progress]
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -30,7 +34,7 @@ jobs:
         done
         echo "Got run id: '${RUNNAME1}|${RUNNAME2}|${RUNNAME3}' : '${RUNID}'"
         
-        echo "Trigger workflow_run[in_progress]: '${RUNNAME1}|${RUNNAME2}${RUNNAME3}'"
+        echo "Trigger workflow_run[in_progress]: '${RUNNAME1}|${RUNNAME2}|${RUNNAME3}'"
         sleep 5
         # this blocks until the run is finished
         gh -R ${{ github.repository }} run watch -i 30 ${RUNID} >/dev/null
