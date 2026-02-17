@@ -142,6 +142,13 @@ jobs:
         echo "SUMMARY="${SUM//\'/\"} >> $GITHUB_ENV
         
         exit ${FAILS:-0}
+
+    - name: Output summary
+      if: always()
+      run: |
+        cd proxysql_3p_testing/test_${{ env.TESTNAME }}
+        cat ./logs/*/*_summary.log
+        cat ./logs/*/*_summary.log | sed -n '/^Results:/,/^FAIL:/ p' | sed '/===/ d' >> $GITHUB_STEP_SUMMARY
     
     - name: Summary output
       if: ${{ !cancelled() }}
