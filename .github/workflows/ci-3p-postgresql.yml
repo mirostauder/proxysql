@@ -132,7 +132,7 @@ jobs:
       run: |
         cd proxysql_3p_testing/test_${{ env.TESTNAME }}
         cat ./logs/*/*_summary.log
-        cat ./logs/*/*_summary.log | sed -n '/Results:/,/FAIL:/ p' >> $GITHUB_STEP_SUMMARY
+        cat ./logs/*/*_summary.log | sed -n '/Results:/,/FAIL:/ p' | sed '/===/ d' >> $GITHUB_STEP_SUMMARY
     
     - name: Check baseline
       env:
