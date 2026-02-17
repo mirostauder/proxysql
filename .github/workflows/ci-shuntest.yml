@@ -82,6 +82,8 @@ jobs:
         cd jenkins-build-scripts/infra-docker-hoster
         sed -i 's|image: .*|image: ghcr.io/mrmohebi/docker-hoster|' docker-compose.yml
         docker compose up -d
+        sleep 15
+        docker ps -a
 
     - name: Shun-tests
       run: |
