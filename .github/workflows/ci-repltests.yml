@@ -95,7 +95,8 @@ jobs:
         sed -i "s|WORKSPACE=.*|WORKSPACE=${{ github.workspace }}/proxysql|" env.sh
         
         cd proxysql_repl_tests
-        sed -i "s| 2>/dev/null||" exec_all_repl_tests.sh
+        sed -i 's| 2>/dev/null||' exec_all_repl_tests.sh
+        sed -i '|./proxysql | a sleep 15; cat $REPL_INFRA_DATADIR/proxysql/proxysql.log' exec_all_repl_tests.sh
         #./exec_repl_test.sh 5.7 no-ssl debezium
         RCS=0
         for N in {1..1}; do

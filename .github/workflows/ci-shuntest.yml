@@ -99,7 +99,8 @@ jobs:
         ls -l ${{ github.workspace }}/proxysql/src
         
         cd proxysql_repl_tests
-        sed -i "s| 2>/dev/null||" exec_shun_test.sh
+        sed -i 's| 2>/dev/null||' exec_shun_test.sh
+        sed -i '|./proxysql | a sleep 15; cat $REPL_INFRA_DATADIR/proxysql/proxysql.log' exec_shun_test.sh
         bash -x ./exec_shun_test.sh
         RC=$?
         
