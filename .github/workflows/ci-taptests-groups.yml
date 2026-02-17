@@ -302,6 +302,8 @@ jobs:
         if [[ $VERS =~ ^3\. ]]; then
           cd ${{ github.workspace }}/jenkins-build-scripts/docker-pgsql16-single
           sed -i "s/\${INFRA}-\${CONTAINER}-1/\${INFRA}_\${CONTAINER}_1/" docker-compose-init.bash
+          sed -i "s/^chmod/sudo chmod/" docker-compose-init.bash
+          sed -i "s/^chown/sudo chown/" docker-compose-init.bash
           ./docker-compose-init.bash
         fi
         
