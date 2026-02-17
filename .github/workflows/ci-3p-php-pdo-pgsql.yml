@@ -121,7 +121,7 @@ jobs:
         #sudo chmod -R 777 ${{ github.workspace }}/*
         exit $RC
 
-     - name: Output summary
+    - name: Output summary
       if: always()
       run: |
         cd proxysql_3p_testing/test_${{ env.TESTNAME }}
