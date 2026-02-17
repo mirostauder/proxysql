@@ -281,9 +281,9 @@ jobs:
         sleep 10
         mysql -uadmin -padmin -h127.0.0.1 -P6032 -e "SELECT version();" 2>&1 | grep -v "Using a password"
         
-        cd ${{ github.workspace }}/jenkins-build-scripts
-        ./cluster_init.bash
-        sleep 10        
+        #cd ${{ github.workspace }}/jenkins-build-scripts
+        #./cluster_init.bash
+        #sleep 10        
 
     - name: Infra
       run: |
