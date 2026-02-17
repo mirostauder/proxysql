@@ -72,7 +72,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: 'proxysql/jenkins-build-scripts'
-#        ref: 'proxysql_repl_tests'
+        ref: 'proxysql_repl_tests'
         fetch-depth: 0
         path: 'jenkins-build-scripts'
         token: ${{ secrets.GH_TOKEN_PROXYSQL }}
@@ -99,9 +99,7 @@ jobs:
         ls -l ${{ github.workspace }}/proxysql/src
         
         cd proxysql_repl_tests
-        sed -i 's| 2>/dev/null||' exec_shun_test.sh
-        sed -i '/proxysql --idle-threads/ a sleep 15; cat $REPL_INFRA_DATADIR/proxysql/proxysql.log' exec_shun_test.sh
-        bash -x ./exec_shun_test.sh
+        ./exec_shun_test.sh
         RC=$?
         
         sudo chmod -R 777 ${{ github.workspace }}/*
